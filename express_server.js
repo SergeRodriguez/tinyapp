@@ -12,6 +12,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 }
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 })
@@ -42,7 +55,6 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     username: req.cookies["username"]
   };
-  console.log("this cookie in urls", req.cookies)
 
   res.render("urls_index", templateVars);
 });
@@ -66,7 +78,10 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-res.render("urls_register")
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars)
 })
 
 app.post("/urls", (req, res) => {
@@ -88,9 +103,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
-  console.log("this cookie", req.cookies)
-  console.log("this res", res)
-  console.log("this req", req)
   res.redirect("/urls")
 });
 
@@ -99,7 +111,42 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls")
 });
 
+app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+  if (email === "" || password === "") {
+    res.status(401).send('You forgot to enter your email/password!');
+    return;
+  } 
+  
+  if(findUser(email)){
+    res.status(401).send("The email you entered already exists in our database");
+    return;
+  }
 
+    const id = generateRandomString();
+    const newUser = {
+      id,
+      email,
+      password
+    }
+    users[id] = newUser
+    res.cookie("user_id", id)
+
+    res.redirect("/urls")
+  
+})
+
+// We want to check if that email exists in users db
+const findUser = email => {
+  // itetrate through the users object
+  for (let userId in users) {
+    const currentUser = users[userId];
+    if (currentUser.email === email) {
+      return currentUser;
+    }
+  }
+  return false;
+};
 
 function generateRandomString() {
   var result = '';
@@ -111,3 +158,6 @@ function generateRandomString() {
   return result;
 }
 
+app.get('/db/users', (req, res) => {
+  res.json(users);
+});

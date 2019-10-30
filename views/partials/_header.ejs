@@ -8,27 +8,22 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-       
+
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
         <%if(user) {%>
-        <a class="navbar-brand" style="display: inline; margin:0 1em 0 1em;color:white">Logged in as: <%= user.email %></a>
-       
+        <a class="navbar-brand" style="display: inline; margin:0 1em 0 1em;color:white">Logged in as:
+          <%= user.email %></a>
+
         <form method="POST" action="/logout">
           <div class="form-group mb-2">
-            <button name="username"  type="submit" class="btn btn-outline-light">Logout</button>
+            <button name="logout" type="submit" class="btn btn-outline-light">Logout</button>
           </div>
-        </form>
-        
-        <% } else{ %>  
-        <form method="POST" action="/login">
-          <div class="form-group mb-2">
-            <input name="username" style="display: inline; width:300px; margin:0 0 0 1em" class="form-control"
-              type="text" placeholder="Username">
-            <button type="submit" class="btn btn-primary">Sign In</button>
-          </div>
-          <% } %>
         </form>
 
+        <% } else{ %>
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <% } %>
       </div>
     </div>
   </nav>

@@ -53,7 +53,7 @@ app.get("/fetch", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
 
   res.render("urls_index", templateVars);
@@ -61,13 +61,17 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_show", templateVars)
 })
 
@@ -79,7 +83,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars)
 })
@@ -116,24 +120,24 @@ app.post("/register", (req, res) => {
   if (email === "" || password === "") {
     res.status(401).send('You forgot to enter your email/password!');
     return;
-  } 
-  
-  if(findUser(email)){
+  }
+
+  if (findUser(email)) {
     res.status(401).send("The email you entered already exists in our database");
     return;
   }
 
-    const id = generateRandomString();
-    const newUser = {
-      id,
-      email,
-      password
-    }
-    users[id] = newUser
-    res.cookie("user_id", id)
+  const id = generateRandomString();
+  const newUser = {
+    id,
+    email,
+    password
+  }
+  users[id] = newUser
+  res.cookie("user_id", id)
 
-    res.redirect("/urls")
-  
+  res.redirect("/urls")
+
 })
 
 // We want to check if that email exists in users db

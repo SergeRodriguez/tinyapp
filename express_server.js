@@ -38,11 +38,11 @@ app.get("/fetch", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { 
-    urls: urlDatabase, 
+  let templateVars = {
+    urls: urlDatabase,
     username: req.cookies["username"]
-   };
-   console.log("this cookie in urls",req.cookies)           
+  };
+  console.log("this cookie in urls", req.cookies)
 
   res.render("urls_index", templateVars);
 });
@@ -65,37 +65,41 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/register", (req, res) => {
+res.render("urls_register")
+})
+
 app.post("/urls", (req, res) => {
   shortURL = generateRandomString()
   urlDatabase[shortURL] = req.body.longURL
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) =>{
+app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls")
 })
 
-app.post("/urls/:shortURL/edit", (req, res) =>{
-  urlDatabase[req.params.shortURL] = req.body.longURL; 
+app.post("/urls/:shortURL/edit", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
   console.log(req.body, req.header)
   res.redirect("/urls")
 })
 
-app.post("/login", (req,res)=>{
-  res.cookie("username",req.body.username); 
-  console.log("this cookie",req.cookies)
-  console.log("this res", res)   
-  console.log("this req", req)            
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  console.log("this cookie", req.cookies)
+  console.log("this res", res)
+  console.log("this req", req)
   res.redirect("/urls")
 });
 
-app.post("/logout", (req,res)=>{
-  res.clearCookie("username")         
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")
   res.redirect("/urls")
 });
 
-   
+
 
 function generateRandomString() {
   var result = '';

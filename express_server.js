@@ -112,18 +112,30 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect("/urls")
 })
 
-app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls")
-});
-
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id")
   res.redirect("/urls")
 });
 
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  if(!findUser(email)){
+    res.status(403).send("The email you entered is not valid");
+    return;
+  } 
+
+  if(findUser(email).password !== password){
+    res.status(403).send("You did not enter the correct password. Please retry");
+    return;
+  } 
+
+  res.cookie("user_id", findUser(email).id)
+  res.redirect("/urls")
+});
+
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+
   if (email === "" || password === "") {
     res.status(401).send('You forgot to enter your email/password!');
     return;
@@ -134,15 +146,9 @@ app.post("/register", (req, res) => {
     return;
   }
 
-  const id = generateRandomString();
-  const newUser = {
-    id,
-    email,
-    password
-  }
-  users[id] = newUser
+  const id = generateRandomString()
+  addUser(email, password, id)
   res.cookie("user_id", id)
-
   res.redirect("/urls")
 
 })
@@ -157,6 +163,16 @@ const findUser = email => {
     }
   }
   return false;
+};
+
+const addUser = (email, password, id) => {
+  const newUser = {
+    id,
+    email,
+    password
+  };
+  users[id] = newUser;
+  return id;
 };
 
 function generateRandomString() {

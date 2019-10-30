@@ -8,9 +8,9 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-}
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+};
 
 const users = {
   "userRandomID": {
@@ -51,9 +51,10 @@ app.get("/fetch", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  urlsForUser(req.cookies["user_id"])
   let templateVars = {
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: urlsForUser(req.cookies["user_id"])   //users[req.cookies["user_id"]]
   };
 
   res.render("urls_index", templateVars);
@@ -69,7 +70,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars)
@@ -77,7 +78,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   // const longURL = ..
-  const longURL = urlDatabase[req.params.shortURL]
+  const longURL = urlDatabase[req.params.shortURL].longURL
   res.redirect(longURL);
 });
 
@@ -153,6 +154,18 @@ app.post("/register", (req, res) => {
 
 })
 
+//returns the URLs where the userID is equal to the id of the currently logged in user.
+const urlsForUser = id =>{
+  const urlsForCurrentUser = {};
+  for(let url in urlDatabase){  
+    if (urlDatabase[url].userID === id){
+      urlsForCurrentUser[url] = urlDatabase[url]
+    }
+  }
+  return urlsForCurrentUser;
+}
+
+
 // We want to check if that email exists in users db
 const findUser = email => {
   // itetrate through the users object
@@ -187,4 +200,8 @@ function generateRandomString() {
 
 app.get('/db/users', (req, res) => {
   res.json(users);
+});
+
+app.get('/db/url', (req, res) => {
+  res.json(urlDatabase);
 });

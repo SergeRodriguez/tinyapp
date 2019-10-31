@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
@@ -68,7 +69,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+  if (req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID) {
     res.status(404).send("The short URL cannot be located in your account")
     return
   }
@@ -103,14 +104,14 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   shortURL = generateRandomString()
   urlDatabase[shortURL] = {
-    longURL:req.body.longURL,
+    longURL: req.body.longURL,
     userID: req.cookies["user_id"]
   }
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+  if (req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID) {
     res.status(404).send("The short URL cannot be located in your account")
     return;
   }
@@ -119,13 +120,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 })
 
 app.post("/urls/:shortURL/edit", (req, res) => {
- 
-  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+
+  if (req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID) {
     res.status(404).send("The short URL cannot be located in your account")
     return;
   }
   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  
+
   res.redirect("/urls")
 })
 
@@ -136,15 +137,18 @@ app.post("/logout", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if(!findUser(email)){
+  if (!findUser(email)) {
     res.status(403).send("The email you entered is not valid");
     return;
-  } 
+  }
+  console.log('PASSWORD:', password)
+  console.log("User Password",findUser(email).password)
+  console.log(bcrypt.compareSync(password, findUser(email).password))
 
-  if(findUser(email).password !== password){
+  if (!bcrypt.compareSync(password, findUser(email).password)) {
     res.status(403).send("You did not enter the correct password. Please retry");
     return;
-  } 
+  }
 
   res.cookie("user_id", findUser(email).id)
   res.redirect("/urls")
@@ -152,6 +156,7 @@ app.post("/login", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+
 
   if (email === "" || password === "") {
     res.status(401).send('You forgot to enter your email/password!');
@@ -162,19 +167,19 @@ app.post("/register", (req, res) => {
     res.status(401).send("The email you entered already exists in our database");
     return;
   }
-
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString()
-  addUser(email, password, id)
+  addUser(email, hashedPassword, id)
   res.cookie("user_id", id)
   res.redirect("/urls")
 
 })
 
 //returns the URLs where the userID is equal to the id of the currently logged in user.
-const urlsForUser = id =>{
+const urlsForUser = id => {
   const urlsForCurrentUser = {};
-  for(let url in urlDatabase){  
-    if (urlDatabase[url].userID === id){
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
       urlsForCurrentUser[url] = urlDatabase[url]
     }
   }

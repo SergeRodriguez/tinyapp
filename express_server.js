@@ -1,5 +1,5 @@
 const express = require("express");
-const { findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase } = require("./helpers")
+const { findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase } = require("./helpers");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 const app = express();
@@ -20,36 +20,22 @@ app.use(
 
 app.get("/", (req, res) => {
   if (req.session.user_id) {
-    res.redirect("/urls")
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
   }
-  else {
-    res.redirect("/login")
-  }
-})
+});
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`)
-})
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
-
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-});
-
 app.get("/urls", (req, res) => {
-  const userUrls = urlsForUser(req.session.user_id)
+  const userUrls = urlsForUser(req.session.user_id);
   let templateVars = {
     urls: userUrls,
     user: users[req.session.user_id]
@@ -67,11 +53,11 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
   let templateVars = {
@@ -79,15 +65,15 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.session.user_id]
   };
-  res.render("urls_show", templateVars)
-})
+  res.render("urls_show", templateVars);
+});
 
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
-  const longURL = urlDatabase[req.params.shortURL].longURL
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -95,55 +81,55 @@ app.get("/register", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
   };
-  res.render("urls_register", templateVars)
-})
+  res.render("urls_register", templateVars);
+});
 
 app.get("/login", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
   };
-  res.render("urls_login", templateVars)
-})
+  res.render("urls_login", templateVars);
+});
 
 app.post("/urls", (req, res) => {
-  shortURL = generateRandomString()
+  let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
-  }
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
-  delete urlDatabase[req.params.shortURL]
-  res.redirect("/urls")
-})
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
 
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send("The short URL cannot be located.")
+    res.status(404).send("The short URL cannot be located.");
     return;
   }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.status(404).send("The short URL cannot be located in your account")
+    res.status(404).send("The short URL cannot be located in your account");
     return;
   }
   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
 
-  res.redirect("/urls")
-})
+  res.redirect("/urls");
+});
 
 app.post("/logout", (req, res) => {
-  req.session = null
-  res.redirect("/urls")
+  req.session = null;
+  res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
@@ -159,7 +145,7 @@ app.post("/login", (req, res) => {
   }
 
   req.session.user_id = findUserByEmail(email, users).id;// res.cookie("user_id", findUserByEmail(email, users).id)
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.post("/register", (req, res) => {
@@ -175,18 +161,18 @@ app.post("/register", (req, res) => {
     return;
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
-  const id = generateRandomString()
-  addUser(email, hashedPassword, id)
+  const id = generateRandomString();
+  addUser(email, hashedPassword, id);
   req.session.user_id = id;  //res.cookie("user_id", id)
-  res.redirect("/urls")
+  res.redirect("/urls");
 
-})
-
-
-app.get('/db/users', (req, res) => {
-  res.json(users);
 });
 
-app.get('/db/url', (req, res) => {
-  res.json(urlDatabase);
-});
+// Check databases
+// app.get('/db/users', (req, res) => {
+//   res.json(users);
+// });
+
+// app.get('/db/url', (req, res) => {
+//   res.json(urlDatabase);
+// });

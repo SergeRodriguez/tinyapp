@@ -1,20 +1,8 @@
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
+// URL database
+const urlDatabase = {};
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-}
+//Users database
+const users = {};
 
 // We want to check if that email exists in users db
 const findUserByEmail = (email, usersDatabase) => {
@@ -26,19 +14,20 @@ const findUserByEmail = (email, usersDatabase) => {
     }
   }
   return false;
-};  
+};
 
 //returns the URLs where the userID is equal to the id of the currently logged in user.
 const urlsForUser = id => {
   const urlsForCurrentUser = {};
   for (let url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
-      urlsForCurrentUser[url] = urlDatabase[url]
+      urlsForCurrentUser[url] = urlDatabase[url];
     }
   }
   return urlsForCurrentUser;
-}
+};
 
+// ads a User to the users database
 const addUser = (email, password, id) => {
   const newUser = {
     id,
@@ -49,14 +38,14 @@ const addUser = (email, password, id) => {
   return id;
 };
 
-function generateRandomString() {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for (var i = 0; i < 6; i++) {
+const generateRandomString = () => {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
-}
+};
 
-module.exports = {findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase}
+module.exports = { findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase };

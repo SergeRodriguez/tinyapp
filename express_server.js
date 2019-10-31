@@ -1,4 +1,5 @@
 const express = require("express");
+const{findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase}= require("./helpers")
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 const app = express();
@@ -16,23 +17,6 @@ app.use(
     ],
   }),
 );
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
-
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -145,20 +129,17 @@ app.post("/logout", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  if (!findUser(email)) {
+  if (!findUserByEmail(email, users)) {
     res.status(403).send("The email you entered is not valid");
     return;
   }
-  console.log('PASSWORD:', password)
-  console.log("User Password",findUser(email).password)
-  console.log(bcrypt.compareSync(password, findUser(email).password))
-
-  if (!bcrypt.compareSync(password, findUser(email).password)) {
+  
+  if (!bcrypt.compareSync(password, findUserByEmail(email, users).password)) {
     res.status(403).send("You did not enter the correct password. Please retry");
     return;
   }
 
-  req.session.user_id = findUser(email).id;// res.cookie("user_id", findUser(email).id)
+  req.session.user_id = findUserByEmail(email, users).id;// res.cookie("user_id", findUserByEmail(email, users).id)
   res.redirect("/urls")
 });
 
@@ -170,7 +151,7 @@ app.post("/register", (req, res) => {
     return;
   }
 
-  if (findUser(email)) {
+  if (findUserByEmail(email, users)) {
     res.status(401).send("The email you entered already exists in our database");
     return;
   }
@@ -182,49 +163,6 @@ app.post("/register", (req, res) => {
 
 })
 
-//returns the URLs where the userID is equal to the id of the currently logged in user.
-const urlsForUser = id => {
-  const urlsForCurrentUser = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      urlsForCurrentUser[url] = urlDatabase[url]
-    }
-  }
-  return urlsForCurrentUser;
-}
-
-
-// We want to check if that email exists in users db
-const findUser = email => {
-  // itetrate through the users object
-  for (let userId in users) {
-    const currentUser = users[userId];
-    if (currentUser.email === email) {
-      return currentUser;
-    }
-  }
-  return false;
-};
-
-const addUser = (email, password, id) => {
-  const newUser = {
-    id,
-    email,
-    password
-  };
-  users[id] = newUser;
-  return id;
-};
-
-function generateRandomString() {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for (var i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
 
 app.get('/db/users', (req, res) => {
   res.json(users);

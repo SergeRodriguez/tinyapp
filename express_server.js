@@ -1,5 +1,5 @@
 const express = require("express");
-const{findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase}= require("./helpers")
+const { findUserByEmail, urlsForUser, addUser, generateRandomString, users, urlDatabase } = require("./helpers")
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 const app = express();
@@ -19,7 +19,12 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect("/urls")
+  }
+  else {
+    res.redirect("/login")
+  }
 })
 
 app.listen(PORT, () => {
@@ -61,9 +66,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("The short URL cannot be located.")
+    return;
+  }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.status(404).send("The short URL cannot be located in your account")
-    return
+    res.status(404).send("The short URL cannot be located.")
+    return;
   }
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -74,7 +83,10 @@ app.get("/urls/:shortURL", (req, res) => {
 })
 
 app.get("/u/:shortURL", (req, res) => {
-  // const longURL = ..
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("The short URL cannot be located.")
+    return;
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL
   res.redirect(longURL);
 });
@@ -103,8 +115,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("The short URL cannot be located.")
+    return;
+  }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.status(404).send("The short URL cannot be located in your account")
+    res.status(404).send("The short URL cannot be located.")
     return;
   }
   delete urlDatabase[req.params.shortURL]
@@ -112,7 +128,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 })
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("The short URL cannot be located.")
+    return;
+  }
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
     res.status(404).send("The short URL cannot be located in your account")
     return;
@@ -133,7 +152,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("The email you entered is not valid");
     return;
   }
-  
+
   if (!bcrypt.compareSync(password, findUserByEmail(email, users).password)) {
     res.status(403).send("You did not enter the correct password. Please retry");
     return;

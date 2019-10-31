@@ -51,10 +51,10 @@ app.get("/fetch", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  urlsForUser(req.cookies["user_id"])
+  const userUrls = urlsForUser(req.cookies["user_id"])
   let templateVars = {
-    urls: urlDatabase,
-    user: urlsForUser(req.cookies["user_id"])   //users[req.cookies["user_id"]]
+    urls: userUrls,
+    user: users[req.cookies["user_id"]]
   };
 
   res.render("urls_index", templateVars);
@@ -68,6 +68,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+    res.status(404).send("The short URL cannot be located in your account")
+    return
+  }
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
@@ -98,18 +102,30 @@ app.get("/login", (req, res) => {
 
 app.post("/urls", (req, res) => {
   shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL
+  urlDatabase[shortURL] = {
+    longURL:req.body.longURL,
+    userID: req.cookies["user_id"]
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+    res.status(404).send("The short URL cannot be located in your account")
+    return;
+  }
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls")
 })
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  console.log(req.body, req.header)
+ 
+  if(req.cookies["user_id"] !== urlDatabase[req.params.shortURL].userID){
+    res.status(404).send("The short URL cannot be located in your account")
+    return;
+  }
+  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+  
   res.redirect("/urls")
 })
 

@@ -11,13 +11,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Create Account page display which prompts users to register"](https://github.com/SergeRodriguez/tinyapp/blob/master/public/createAccount.png)
+!["Create Account page display which prompts users to register"](https://github.com/SergeRodriguez/tinyapp/blob/master/docs/createAccount.png)
 
-!["Main page containing all of the user's short URLs](https://github.com/SergeRodriguez/tinyapp/blob/master/public/myURLs.png)
+!["Main page containing all of the user's short URLs](https://github.com/SergeRodriguez/tinyapp/blob/master/docs/myURLs.png)
 
-!["Edit page allowing users to update their short URLs"](https://github.com/SergeRodriguez/tinyapp/blob/master/public/tinyURL_Edit.png)
+!["Edit page allowing users to update their short URLs"](https://github.com/SergeRodriguez/tinyapp/blob/master/docs/tinyURL_Edit.png)
 
-!["Page to create new short URl"](https://github.com/SergeRodriguez/tinyapp/blob/master/public/createTinyURL.png)
+!["Page to create new short URl"](https://github.com/SergeRodriguez/tinyapp/blob/master/docs/createTinyURL.png)
 
 ## Dependencies
 
